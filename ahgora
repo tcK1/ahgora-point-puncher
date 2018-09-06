@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Fill your information here \/
+
+ACCOUNT='INFOS'
+PASSWORD='INFOS'
+IDENTITY='INFOS'
+KEY='INFOS'
+
+function printResponse {
+  echo ""
+  echo ${CURL_FORM} | json_pp
+  echo ""
+}
+
+function json_extract() {
+  local key=$1
+  local json=${CURL_FORM}
+
+  local string_regex='"([^"\]|\\.)*"'
+  local number_regex='-?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?'
+  local value_regex="${string_regex}|${number_regex}|true|false|null"
+  local pair_regex="\"${key}\"[[:space:]]*:[[:space:]]*(${value_regex})"
+
+  if [[ ${json} =~ ${pair_regex} ]]; then
+    echo $(sed 's/^"\|"$//g' <<< "${BASH_REMATCH[1]}")
+  else
+    return 1
+  fi
+}
+
+echo ""
+echo ""
+
+echo " ____        _                 _                           _          _ "
+echo "|  _ \      | |               | |                         | |        | |"
+echo "| |_) | __ _| |_ ___ _ __   __| | ___    _ __   ___  _ __ | |_ ___   | |"
+echo "|  _ < / _  | __/ _ \ '_ \ / _  |/ _ \  | '_ \ / _ \| '_ \| __/ _ \  | |"
+echo "| |_) | (_| | ||  __/ | | | (_| | (_) | | |_) | (_) | | | | || (_) | |_|"
+echo "|____/ \__,_|\__\___|_| |_|\__,_|\___/  | .__/ \___/|_| |_|\__\___/  (_)"
+echo "                                        | |                             "
+echo "                                        |_|                             "
+
+echo ""
+echo ""
+
+# Curl to the "api"
+
+CURL_FORM=`curl -sX POST \
+-F "account=${ACCOUNT}" \
+-F "password=${PASSWORD}" \
+-F "identity=${IDENTITY}" \
+-F "origin=pw2" \
+-F "key=${KEY}" \
+http://www.ahgora.com.br/batidaonline/verifyIdentification`
+
+result=`json_extract result`
+
+if [ "${result}" == false ]
+then
+  echo -e "Seu ponto \e[91mnão foi efetivado \e[0m:("
+  printResponse
+  exit 3
+else
+  echo -e "Seu ponto \e[32mfoi efetivado \e[0m:)"
+  printResponse
+  exit 0
+fi
