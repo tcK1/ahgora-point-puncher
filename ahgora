@@ -1,16 +1,53 @@
 #!/bin/bash
 
 # Fill your information here \/
+ACCOUNT=''
+PASSWORD=''
+IDENTITY=''
+KEY=''
 
-ACCOUNT='INFOS'
-PASSWORD='INFOS'
-IDENTITY='INFOS'
-KEY='INFOS'
+success_message="Seu ponto foi efetivado :)"
+error_message="Seu ponto não foi efetivado :("
 
-function printResponse {
-  echo ""
+function print_usage() {
+  echo 'Usage: ahgora'
+  echo ''
+  echo 'optional arguments:'
+  echo '    -n, --notify -> prints the output to system notifier'
+  exit
+}
+
+while [ ! $# -eq 0 ]
+do
+  case "$1" in
+    -n | --notify) notify_flag=true ;;
+    *) print_usage
+       exit 1 ;;
+  esac
+  shift
+done
+
+function printResponse() {
+  local status=$1
+
+  local red=$(tput bold)$(tput setaf 160)
+  local green=$(tput bold)$(tput setaf 46)
+
+  case "$status" in
+    "error") echo -e ${red} $error_message;
+             local message=$error_message ;;
+
+    *)       echo -e ${green} $success_message;
+             local message=$success_message ;;
+  esac
+
+  echo $(tput sgr0)
   echo ${CURL_FORM} | json_pp
   echo ""
+
+  if [ $notify_flag ]; then
+    notify-send "$message" "${CURL_FORM}"
+  fi
 }
 
 function json_extract() {
@@ -45,24 +82,21 @@ echo ""
 echo ""
 
 # Curl to the "api"
-
 CURL_FORM=`curl -sX POST \
--F "account=${ACCOUNT}" \
--F "password=${PASSWORD}" \
--F "identity=${IDENTITY}" \
--F "origin=pw2" \
--F "key=${KEY}" \
-http://www.ahgora.com.br/batidaonline/verifyIdentification`
+  -F "account=${ACCOUNT}" \
+  -F "password=${PASSWORD}" \
+  -F "identity=${IDENTITY}" \
+  -F "origin=pw2" \
+  -F "key=${KEY}" \
+  http://www.ahgora.com.br/batidaonline/verifyIdentification`
 
 result=`json_extract result`
 
 if [ "${result}" == false ]
 then
-  echo -e "Seu ponto \e[91mnão foi efetivado \e[0m:("
-  printResponse
+  printResponse "error"
   exit 3
 else
-  echo -e "Seu ponto \e[32mfoi efetivado \e[0m:)"
-  printResponse
+  printResponse "success"
   exit 0
 fi
