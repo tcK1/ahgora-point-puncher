@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo "Bem vindo ao instalador de batida de ponto\!"
+echo ""
+
+echo "Por favor, insira os dados necessários."
+echo ""
+
+read -p "ACCOUNT: "  ACCOUNT
+read -p "PASSWORD: " PASSWORD
+read -p "IDENTITY: " IDENTITY
+
+echo ""
+echo "Criando arquivo `data`..."
+
+touch data
+echo "ACCOUNT='${ACCOUNT}'"   >> data
+echo "PASSWORD='${PASSWORD}'" >> data
+echo "IDENTITY='${IDENTITY}'" >> data
+
+echo "Arquivo criado! Você pode edita-lo a qualquer momento."
+echo ""
+
+chmod +x ahgora
+
+read -p "Deseja criar um link simbolico? (poder executar o comando de qualquer lugar) [Y/n]? " -n 1
+echo ""
+if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    echo "Criando link..."
+    sudo ln -sf $PWD/ahgora /usr/bin/ahgora
+fi
+
+echo "Pronto, script preparado! :-)"

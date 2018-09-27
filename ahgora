@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Fill your information here \/
-ACCOUNT=''
-PASSWORD=''
-IDENTITY=''
-KEY=''
+source data
 
 success_message="Seu ponto foi efetivado :)"
 error_message="Seu ponto não foi efetivado :("
@@ -87,7 +83,7 @@ CURL_FORM=`curl -sX POST \
   -F "password=${PASSWORD}" \
   -F "identity=${IDENTITY}" \
   -F "origin=pw2" \
-  -F "key=${KEY}" \
+  -F "key=" \
   http://www.ahgora.com.br/batidaonline/verifyIdentification`
 
 result=`json_extract result`
